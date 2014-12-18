@@ -13,6 +13,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{1508020A-7365-46DA-9BE8-850BD238A957}</ProjectGuid>
     <RootNamespace>FlytheThird</RootNamespace>
+    <ProjectName>Final Fly</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
