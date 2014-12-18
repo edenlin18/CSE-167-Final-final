@@ -1,8 +1,5 @@
 uniform sampler2DShadow ShadowMap;
 
-uniform sampler2D Texture;
-uniform int Shading;
-
 varying vec4 ShadowCoord;
 
 // This define the value to move one pixel left or right
@@ -42,35 +39,71 @@ void main(){
 
 
 
-	// TEXTURE
-	float texture = 1.0;
-	if(Shading >= 1){
-		texture = texture2D(Texture, gl_TexCoord[0].st);
-	}
-
-
-
-
 
 	// SHADOW MAP
 	float visbility = 1.0;
 	
-	if(Shading >= 2){
-		// Avoid counter shadow
-		if (ShadowCoord.w > 1.0)
-		{
-			// 8x8 kernel PCF
-					
-			float x,y;
-			for (y = -3.5 ; y <=3.5 ; y+=1.0)
-				for (x = -3.5 ; x <=3.5 ; x+=1.0)
-					visbility += lookup(vec2(x,y));
-					
-			visbility /= 64.0 ;
-		}
-	}
-	
+	// Avoid counter shadow
+	if (ShadowCoord.w > 1.0)
+	{
+		// Simple lookup, no PCF
+		/*
+		visbility = lookup(vec2(0.0,0.0));
+		*/
 
-  	gl_FragColor = (visbility + 0.2) * color * gl_Color * texture;
+		// USING THIS
+		// 8x8 kernel PCF
+					
+		float x,y;
+		for (y = -3.5 ; y <=3.5 ; y+=1.0)
+			for (x = -3.5 ; x <=3.5 ; x+=1.0)
+				visbility += lookup(vec2(x,y));
+					
+		visbility /= 64.0 ;
+					
+		// 8x8 PCF wide kernel (step is 10 instead of 1)
+		/*
+		float x,y;
+		for (y = -30.5 ; y <=30.5 ; y+=10.0)
+			for (x = -30.5 ; x <=30.5 ; x+=10.0)
+				visbility += lookup(vec2(x,y));
+					
+		visbility /= 64.0 ;
+		*/
+	
+		// 4x4 kernel PCF
+		/*
+		float x,y;
+		for (y = -1.5 ; y <=1.5 ; y+=1.0)
+			for (x = -1.5 ; x <=1.5 ; x+=1.0)
+				visbility += lookup(vec2(x,y));
+		
+		visbility /= 16.0 ;
+		*/
+		
+		// 4x4  PCF wide kernel (step is 10 instead of 1)
+		/*
+		float x,y;
+		for (y = -10.5 ; y <=10.5 ; y+=10.0)
+			for (x = -10.5 ; x <=10.5 ; x+=10.0)
+				visbility += lookup(vec2(x,y));
+					
+		visbility /= 16.0 ;
+		*/
+		
+		// 4x4  PCF dithered
+		/*
+		// use modulo to vary the sample pattern
+		vec2 o = mod(floor(gl_FragCoord.xy), 2.0);
+				
+		visbility += lookup(vec2(-1.5, 1.5) + o);
+		visbility += lookup(vec2( 0.5, 1.5) + o);
+		visbility += lookup(vec2(-1.5, -0.5) + o);
+		visbility += lookup(vec2( 0.5, -0.5) + o);
+		visbility *= 0.25 ;
+		*/
+	}
+
+  	gl_FragColor = (visbility + 0.2) * color * gl_Color;
 }
 

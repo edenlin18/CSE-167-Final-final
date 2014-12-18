@@ -36,6 +36,9 @@ class Matrix4d
     void identity(); 
     void transpose();
 	void print(std::string comment);
+
+	// ADDITIONS
+	Matrix4d inverse();
 };
 
 #endif

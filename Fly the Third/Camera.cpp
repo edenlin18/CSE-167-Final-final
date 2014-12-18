@@ -65,8 +65,6 @@ void Camera::setCamera(double eyeX, double eyeY, double eyeZ,
 	t.makeTranslate(-eyeX, -eyeY, -eyeZ);
 
 	m = r * t;						// inverse camera
-
-
 }
 
 Matrix4d Camera::getMatrix(){

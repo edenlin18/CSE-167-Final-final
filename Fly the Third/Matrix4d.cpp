@@ -248,3 +248,29 @@ void Matrix4d::set(int x, int y, double e){
 double Matrix4d::get(int x, int y){
 	return m[x][y];
 }
+
+// Camera exclusive inverse
+Matrix4d Matrix4d::inverse(){
+
+	Matrix4d R, T, C;
+
+	// Rotation matrix
+	for (int i = 0; i < 3; ++i){
+		for (int j = 0; j < 3; ++j){
+			R.set(j, i, m[j][i]);
+		}
+	}
+	R.set(3, 3, 1.0);
+	R.transpose();
+
+	// Translation matrix
+	T.identity();
+	for (int i = 0; i < 3; ++i){
+		T.set(3, i, -m[3][i]);
+	}
+
+	// Inverse
+	C = R * T;
+
+	return C;
+}

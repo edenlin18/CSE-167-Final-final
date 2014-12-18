@@ -24,6 +24,8 @@ void Cube::render() {
 		glColor3d(color[0], color[1], color[2]);
 	switch (mode) {
 		case draw::SOLID:
+			//glutSolidCube(size);
+
 			drawBox(size);
 			break;
 		case draw::WIRE:
@@ -35,7 +37,10 @@ void Cube::render() {
 
 void Cube::drawBox(GLfloat size) {
 
-	glActiveTextureARB(GL_TEXTURE0);
+
+
+	//glColor3d(color[0], color[1], color[2]);
+	//glutSolidCube(size);
 
 	static GLfloat n[6][3] =
 	{
@@ -73,6 +78,8 @@ void Cube::drawBox(GLfloat size) {
 	//Matrix4d temp;
 	//glGetDoublev(GL_MODELVIEW_MATRIX, temp.getPointer());
 
+	//glActiveTextureARB(GL_TEXTURE0);
+
 	for (i = 5; i >= 0; i--) {
 
 		glColor3d(color[0], color[1], color[2]);
@@ -89,7 +96,7 @@ void Cube::drawBox(GLfloat size) {
 			glBindTexture(GL_TEXTURE_2D, NULL);
 		}
 		else {
-			
+
 			glBindTexture(GL_TEXTURE_2D, texture[roofChoice]);
 		}
 
@@ -111,7 +118,7 @@ void Cube::drawBox(GLfloat size) {
 				glTexCoord2f(zScaling * scalingProportion, yScaling * scalingProportion);
 				glVertex3fv(&v[faces[i][3]][0]);
 				break;
-			// top
+				// top
 			case 1:
 				glTexCoord2f(xScaling * scalingProportion, zScaling * scalingProportion);
 				glVertex3fv(&v[faces[i][0]][0]);
@@ -125,11 +132,11 @@ void Cube::drawBox(GLfloat size) {
 				glTexCoord2f(0, zScaling * scalingProportion);
 				glVertex3fv(&v[faces[i][3]][0]);
 				break;
-			// left
+				// left
 			case 2:
 				glTexCoord2f(0, yScaling * scalingProportion);
 				glVertex3fv(&v[faces[i][0]][0]);
-				
+
 				glTexCoord2f(zScaling * scalingProportion, yScaling * scalingProportion);
 				glVertex3fv(&v[faces[i][1]][0]);
 
@@ -139,7 +146,7 @@ void Cube::drawBox(GLfloat size) {
 				glTexCoord2f(0, 0);
 				glVertex3fv(&v[faces[i][3]][0]);
 				break;
-			// bottom
+				// bottom
 			case 3:
 				glTexCoord2f(xScaling * scalingProportion, 0);
 				glVertex3fv(&v[faces[i][0]][0]);
@@ -149,11 +156,11 @@ void Cube::drawBox(GLfloat size) {
 
 				glTexCoord2f(0, zScaling * scalingProportion);
 				glVertex3fv(&v[faces[i][2]][0]);
-				
+
 				glTexCoord2f(xScaling * scalingProportion, zScaling * scalingProportion);
 				glVertex3fv(&v[faces[i][3]][0]);
 				break;
-			// front
+				// front
 			case 4:
 				glTexCoord2f(0, 0);
 				glVertex3fv(&v[faces[i][0]][0]);
@@ -167,7 +174,7 @@ void Cube::drawBox(GLfloat size) {
 				glTexCoord2f(xScaling * scalingProportion, 0);
 				glVertex3fv(&v[faces[i][3]][0]);
 				break;
-			// back
+				// back
 			case 5:
 				glTexCoord2f(xScaling * scalingProportion, yScaling * scalingProportion);
 				glVertex3fv(&v[faces[i][0]][0]);
@@ -184,18 +191,14 @@ void Cube::drawBox(GLfloat size) {
 			default:
 				break;
 		}
-		/*glTexCoord2f(0, 1.f);  glVertex3fv(&v[faces[i][0]][0]);
-		glTexCoord2f(0.5f, 1);  glVertex3fv(&v[faces[i][1]][0]);
-		glTexCoord2f(0.5f, 0);  glVertex3fv(&v[faces[i][2]][0]);
-		glTexCoord2f(0, 0);  glVertex3fv(&v[faces[i][3]][0]);
-		*/
+
 		glEnd();
 	}
 }
 
 
-Bs Cube::update(){
-	
+Bs Cube::update() {
+
 	return bs;
 }
 

@@ -10,6 +10,14 @@ City::City(MatrixTransform* mt) {
 	int layerCount = 0;
 	int choice = 0;
 
+	/*
+	maxH = ((double) rand() * (MEDIUM_BUILDING_MAX_HEIGHT - MEDIUM_BUILDING_MIN_HEIGHT)) / (double) RAND_MAX + MEDIUM_BUILDING_MIN_HEIGHT;
+	minH = ((double) rand() * (maxH - MEDIUM_BUILDING_MIN_HEIGHT)) / (double) RAND_MAX + MEDIUM_BUILDING_MIN_HEIGHT;
+	layerCount = (rand() * (3 - 1)) / RAND_MAX + 1;
+	choice = 0;
+	bConstructor = new BuildingConstructor(texture, translationSetter, maxH, minH, layerCount, choice);
+	root->addChild(bConstructor->getRoot());*/
+
 	/*Turtle3D* turtle = new Turtle3D("ABC-D+E", "ABCDE", 20, 20, 0.8);
 	turtle->addRule('A', "FFFFFFF[-\AE]F[+&+AE]FFF", 1.0);
 	turtle->addRule('B', "^^^FF", 0.3);
@@ -19,8 +27,9 @@ City::City(MatrixTransform* mt) {
 	turtle->addRule('D', "FF&F", 1.0);
 	MatrixTransform* mt = turtle->generate(5);*/
 
+
 	for (double z = -50.0; z < 50.0; z += 5.0) {
-		for (double x = -50.0; x < 85.0; x += 5.0) {
+		for (double x = -50.0; x < 50.0; x += 5.0) {
 			translationSetter.makeTranslate(x, 0.0, z);
 			if (-17.0 < x && x < 17.0) {
 				maxH = ((double) rand() * (MEDIUM_BUILDING_MAX_HEIGHT - MEDIUM_BUILDING_MIN_HEIGHT)) / (double) RAND_MAX + MEDIUM_BUILDING_MIN_HEIGHT;
@@ -28,7 +37,7 @@ City::City(MatrixTransform* mt) {
 				layerCount = (rand() * (3 - 1)) / RAND_MAX + 1;
 				choice = 0;
 			}
-			else if(x <= -17.0) {
+			else if (x <= -17.0) {
 				maxH = ((double) rand() * (TALL_BUILDING_MAX_HEIGHT - TALL_BUILDING_MIN_HEIGHT)) / (double) RAND_MAX + TALL_BUILDING_MIN_HEIGHT;
 				minH = ((double) rand() * (maxH - TALL_BUILDING_MIN_HEIGHT)) / (double) RAND_MAX + TALL_BUILDING_MIN_HEIGHT;
 				layerCount = (rand() * (5 - 3)) / RAND_MAX + 3;
@@ -67,11 +76,11 @@ City::City(MatrixTransform* mt) {
 
 void City::init() {
 
-	
-	// Create ID for texture
-	//glGenTextures(6, &texture[0]);
 
-	char* filenames[6] = { "./building_texture/building5.jpg", "./building_texture/pixelcity_windows7.jpg", "./building_texture/building3.jpg", 
+	// Create ID for texture
+	glGenTextures(6, &texture[0]);
+
+	char* filenames[6] = { "./building_texture/building5.jpg", "./building_texture/pixelcity_windows7.jpg", "./building_texture/building3.jpg",
 		"./building_texture/building6.jpg", "./building_texture/roof1.jpg", "./building_texture/roof2.jpg" };
 
 	for (unsigned int counter = 0; counter < 6; ++counter) {
@@ -99,6 +108,7 @@ void City::init() {
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
 	}
 }
 

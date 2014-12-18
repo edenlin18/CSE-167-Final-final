@@ -8,6 +8,7 @@
 #include "Matrix4d.h"
 #include "shader.h"
 
+#include "SOIL.h"
 #include "Scene.h"
 
 using namespace std;
@@ -30,6 +31,7 @@ public:
 	static void initializeFBO();
 	static void initializeShader();
 	static void initializeTexture();
+	static void initializeMatrix();
 	static void update();
 
 	static void setupMatrices(float position_x, float position_y, float position_z, float lookAt_x, float lookAt_y, float lookAt_z);
@@ -47,6 +49,9 @@ public:
 	// Regular render
 	static void drawR();
 
+	// Debug
+	static void debug(const string&);
+
 	static void idleCallback(void);
 	static void reshapeCallback(int, int);
 	static void displayCallback(void);
@@ -54,7 +59,5 @@ public:
 	// Process key events
 	static void processKeyboard(unsigned char, int, int);
 	static void processSpecial(int, int, int);
-
-	static void debug(const string& comment);
 };
 

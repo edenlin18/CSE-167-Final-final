@@ -47,9 +47,9 @@ void Scene::draw(Matrix4d C){
 	debug("draw()");
 }
 
-void Scene::drawDefault(){
-
-	/*
+void Scene::drawDefault(){	
+	
+	// GROUND
 	glBegin(GL_QUADS);
 	glColor3f(0.7, 1, 0.7);
 	glNormal3f(0, 1, 0);
@@ -58,7 +58,7 @@ void Scene::drawDefault(){
 	glVertex3f(-1000, 0, -1000);
 	glVertex3f(-1000, 0, 1000);
 	glEnd();
-	*/
+	
 
 	GLdouble size = 10.0;
 
@@ -73,7 +73,9 @@ void Scene::drawDefault(){
 
 
 	glTranslatef(0, size / 2.0, 0);
-	glutSolidSphere(size, 20, 20);
+	// glutSolidSphere(size, 20, 20);
+
+	glutSolidCube(size);
 
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
