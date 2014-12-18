@@ -76,7 +76,7 @@ namespace SM{
 
 // Light
 namespace L{
-	float position[3] = {50, 100, 50 };
+	float position[3] = { 25, 50, 25 };
 	float lookAt[3] = { 0, 0, 0 };
 	const float MOVEMENT = 30.0;
 
@@ -246,6 +246,7 @@ void Window::init() {
 
 
 	root->addChild(pc->plane->getRoot());
+	//root->addChild(skybox);
 
 	Vector3d * v1 = new Vector3d[4];
 	v1[0] = Vector3d(0, 3, 0);
@@ -274,16 +275,19 @@ void Window::initialize(){
 	initializeTexture();
 	initializeMatrix();
 
-	// SCENE
-	// scene = new Scene();
-	// scene->initialize();
-	init();
 
 	// Skybox
 	Matrix4d temp;
 	temp.makeScale(50.0, 1.0, 50.0);
 	skybox = new SkyBox();
 	skybox->init();
+
+	// SCENE
+	// scene = new Scene();
+	// scene->initialize();
+	init();
+
+
 	
 	// LIGHTING
 	glLightfv(GL_LIGHT0, GL_POSITION, L::position);
@@ -292,6 +296,9 @@ void Window::initialize(){
 	glLightfv(GL_LIGHT0, GL_SPECULAR, L::specular);
 
 	
+
+
+	firstPassSM();
 
 	debug("initialize()");
 }
@@ -432,15 +439,18 @@ void Window::setTextureMatrix(){
 }
 
 ///*
-void Window::draw(){
+void Window::draw(Matrix4d m){
 	//scene->draw(Matrix4d());
+	///*
 	if (choice == 3) {
-		root->draw(pc->cam->getMatrix());
+		root->draw(m);
 	}
 	else {
-		root->draw(mc[choice]->cam->getMatrix());
+		root->draw(m);
 	}
-	pc->pbc->render(pc->cam->getMatrix());
+	//pc->pbc->render(m);
+	//*/
+	//pc->plane->getRoot()->draw(pc->cam->getMatrix());
 }
 //*/
 
@@ -488,7 +498,7 @@ void Window::firstPassSM(){
 	glCullFace(GL_FRONT);
 
 	// FIRST RENDER
-	draw();
+	draw(L::VM);
 
 	glCullFace(GL_BACK);
 
@@ -517,15 +527,15 @@ void Window::thirdPassSM(){
 	
 
 	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixd(C::VM.getPointer());
-	/*
+	//glLoadMatrixd(C::VM.getPointer());
+	///*
 	if (choice == 3) {
 		glLoadMatrixd(pc->cam->getMatrix().getPointer());
 	}
 	else {
 		glLoadMatrixd(mc[choice]->cam->getMatrix().getPointer());
 	}
-	*/
+	//*/
 	glLightfv(GL_LIGHT0, GL_POSITION, L::position);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -550,7 +560,7 @@ void Window::thirdPassSM(){
 	glUniform1fARB(SM::uniformX, 1.0 / SM::WIDTH);
 	glUniform1fARB(SM::uniformY, 1.0 / SM::HEIGHT);
 
-	/*
+	///*
 	Matrix4d temp;
 	if (choice == 3) {
 		temp = bias * L::PM * L::VM * pc->cam->getMatrix().inverse();
@@ -558,8 +568,8 @@ void Window::thirdPassSM(){
 	else {
 		temp = bias * L::PM * L::VM * mc[choice]->cam->getMatrix().inverse();
 	}
-	*/
-	Matrix4d temp = bias * L::PM * L::VM * C::IVM;
+	//*/
+	//Matrix4d temp = bias * L::PM * L::VM * C::IVM;
 
 	float test[16];
 	for (int i = 0; i < 4; ++i){
@@ -583,7 +593,12 @@ void Window::thirdPassSM(){
 	glActiveTexture(GL_TEXTURE0);
 
 	// SECOND RENDER
-	draw();
+	if (choice == 3) {
+		draw(pc->cam->getMatrix());
+	}
+	else {
+		draw(mc[choice]->cam->getMatrix());
+	}
 
 	// DISABLE TEXTURE
 	glUniform1i(shading, LIGHT);
@@ -611,6 +626,13 @@ void Window::thirdPassSM(){
 
 	shader->unbind();
 
+	if (choice == 3) {
+		drawP(pc->cam->getMatrix());
+	}
+	else {
+		drawP(mc[choice]->cam->getMatrix());
+	}
+
 	glDisable(GL_DEPTH_TEST);
 
 	debug("thirdPassSM()");
@@ -628,6 +650,23 @@ void Window::drawR(){
 
 }
 
+void Window::drawP(Matrix4d m) {
+	//pc->plane->getRoot()->draw(pc->cam->getMatrix());
+	//float size = 100;
+	//Matrix4d temp;
+	//temp.makeScale(size, size, size);
+
+	/*if (choice == 3) {
+		skybox->draw(pc->cam->getMatrix());
+	}
+	else {
+		skybox->draw(mc[choice]->cam->getMatrix());
+	}*/
+
+	skybox->draw(m);
+
+}
+
 void Window::displayCallback() {
 
 	// Ensure MODELVIEW 
@@ -640,6 +679,8 @@ void Window::displayCallback() {
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_FRONT);
 	glPushMatrix();
+	glLoadIdentity();
+
 	glBegin(GL_LINES);
 
 	// LIGHT

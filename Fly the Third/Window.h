@@ -48,7 +48,7 @@ public:
 	static void setTextureMatrix();
 	static void startTranslate(float x, float y, float z);
 	static void endTranslate();
-	static void draw();
+	static void draw(Matrix4d);
 
 	// Shadow Map Functions
 	static void drawSM();
@@ -58,6 +58,8 @@ public:
 
 	// Regular render
 	static void drawR();
+	
+	static void drawP(Matrix4d);
 
 	// Debug
 	static void debug(const string&);

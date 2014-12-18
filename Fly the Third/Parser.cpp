@@ -17,7 +17,7 @@ Object* Parser::parse_object(char* fileName) {
 	fp = fopen(fileName, "rb");
 	if (fp == NULL) {
 		cerr << "error loading file" << endl;
-		exit(-1);
+		//exit(-1);
 	}
 
 	char c1, c2;

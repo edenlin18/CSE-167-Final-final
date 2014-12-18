@@ -13,9 +13,10 @@
 
 using namespace std;
 
-class SkyBox {
+class SkyBox : public Geode {
 	public:
 	SkyBox();
+	Bs update();
 	void init();
 	void loadTexture(const unsigned int&);
 	void render();

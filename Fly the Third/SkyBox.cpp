@@ -4,6 +4,10 @@ SkyBox::SkyBox() {
 
 }
 
+Bs SkyBox::update() {
+	return Bs();
+}
+
 void SkyBox::init() {
 	// Create ID for texture
 	glGenTextures(6, &texture[0]);
@@ -12,6 +16,10 @@ void SkyBox::init() {
 	char* filenames[6] = { "./skyBox/Skybox_Water222_right.jpg", "./skyBox/Skybox_Water222_left.jpg",
 		"./skyBox/Skybox_Water222_top.jpg", "./skyBox/Skybox_Water222_base.jpg", "./skyBox/Skybox_Water222_back.jpg",
 		"./skyBox/Skybox_Water222_front.jpg" };
+
+	/*char* filenames[6] = { "./skyBox/TropicalSunnyDayRight2048.png", "./skyBox/TropicalSunnyDayLeft2048.png",
+		"./skyBox/TropicalSunnyDayUp2048.png", "./skyBox/TropicalSunnyDayDown2048.png", "./skyBox/TropicalSunnyDayBack2048.png",
+		"./skyBox/TropicalSunnyDayFront2048.png" };*/
 
 	for (unsigned int counter = 0; counter < 6; ++counter) {
 		texture[counter] = SOIL_load_OGL_texture
@@ -53,7 +61,7 @@ void SkyBox::render() {
 		-1.0f, -1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f  // -Z
 	};
 
-	unsigned int ratio = 150;
+	unsigned int ratio = 100;
 
 	for (unsigned int counter = 0; counter < 6; counter++) {
 		if (counter == 3)
@@ -62,13 +70,16 @@ void SkyBox::render() {
 		loadTexture(counter);
 		glBegin(GL_QUADS);
 		glColor3f(1, 1, 1);
-		glTexCoord2f(0, 1);
-		glVertex3f(ratio * SkyBoxVertices[row], ratio * SkyBoxVertices[row + 1], ratio * SkyBoxVertices[row + 2]);
-		glTexCoord2f(1, 1);
-		glVertex3f(ratio * SkyBoxVertices[row + 3], ratio * SkyBoxVertices[row + 4], ratio * SkyBoxVertices[row + 5]);
-		glTexCoord2f(1, 0);
-		glVertex3f(ratio * SkyBoxVertices[row + 6], ratio * SkyBoxVertices[row + 7], ratio * SkyBoxVertices[row + 8]);
 		glTexCoord2f(0, 0);
+		glVertex3f(ratio * SkyBoxVertices[row], ratio * SkyBoxVertices[row + 1], ratio * SkyBoxVertices[row + 2]);
+
+		glTexCoord2f(1, 0);
+		glVertex3f(ratio * SkyBoxVertices[row + 3], ratio * SkyBoxVertices[row + 4], ratio * SkyBoxVertices[row + 5]);
+
+		glTexCoord2f(1, 1);
+		glVertex3f(ratio * SkyBoxVertices[row + 6], ratio * SkyBoxVertices[row + 7], ratio * SkyBoxVertices[row + 8]);
+
+		glTexCoord2f(0, 1);
 		glVertex3f(ratio * SkyBoxVertices[row + 9], ratio * SkyBoxVertices[row + 10], ratio * SkyBoxVertices[row + 11]);
 		glEnd();
 	}
