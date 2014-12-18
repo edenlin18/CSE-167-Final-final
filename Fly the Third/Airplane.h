@@ -4,6 +4,7 @@
 #include "MatrixTransform.h"
 #include "Object.h"
 #include "Parser.h"
+#include "Sphere.h"
 
 class Airplane {
 public:
@@ -12,6 +13,7 @@ public:
 	void setMatrixTransformMatrix(Matrix4d&);
 	void move(Vector3d);
 	Matrix4d getMatrixTransformMatrix();
+	Vector3d getPosition();
 	MatrixTransform* getRoot();
 	~Airplane();
 

@@ -19,7 +19,8 @@ Turtle3D::Turtle3D(string ax, string var, double an, double ra, double _dr){
 	pitchDown.makeRotateX(-angle);
 	rollLeft.makeRotateZ(angle);
 	rollRight.makeRotateZ(-angle);
-	grow.makeTranslate(0, 0.1, 0);
+	grow1.makeTranslate(0, 3, 0);
+	grow2.makeTranslate(0, 1, 0);
 	generation = 0;
 }
 
@@ -38,11 +39,13 @@ MatrixTransform * Turtle3D::generate(int iterations){
 		s = ls->getCurrent();
 	}
 	MatrixTransform * root = new MatrixTransform(Matrix4d());
+	Vector3d leafColor(25.0 / 256.0, 156.0 / 256.0, 42.0 / 256.0);
 	TurtleInfo current;
-	current.color = Vector3d(1, 0, 0);
+	current.color = Vector3d(48.0 / 256.0, 24.0 / 256.0, 0.0 / 256.0);
 	current.dr = dr;
 	current.mt = root;
 	current.radius = radius;
+	current.length = radius / 2;
 	for (int i = 0; i < s.length(); i++){
 		char c = s[i];
 		switch (c){
@@ -65,38 +68,75 @@ MatrixTransform * Turtle3D::generate(int iterations){
 			current.mt->setMatrix(rollRight * (current.mt->getMatrix()));
 			break;
 		case 'F':{
-			/*
-			current.mt->addChild(new Cylinder(current.radius, current.radius * current.dr, 1, 20, 20, current.color));
+			/// using new element
+			MatrixTransform * m;
+			grow1.makeTranslate(0, current.length, 0);
+			if (current.radius / current.length > 0.002){
+				current.mt->addChild(new Cylinder(current.radius, current.radius * current.dr, current.length, 20, current.color));
+			}
+			else{
+				current.mt->addChild(new Line(current.radius, current.length, current.color));
+			}
+			m = new MatrixTransform(grow1);
+			/*using home made cylinder
+			MatrixTransform * m;
+			if (current.radius > 0.2){
+				current.mt->addChild(new Cylinder(current.radius, current.radius * current.dr, 3, 20, current.color));
+				m = new MatrixTransform(grow1);
+			}	
+			else{
+				current.mt->addChild(new Line(current.radius, 1, current.color));
+				m = new MatrixTransform(grow2);
+			}
+			*/	
 			//current.mt->addChild(new Sphere(current.radius, 20, 20, current.color, draw::SOLID));
-			current.mt->addChild(new Disk(0, current.radius, 20, 20, current.color));
-			MatrixTransform * m = new MatrixTransform(grow);
+			//current.mt->addChild(new Disk(0, current.radius, 20, 20, current.color));
+
 			current.mt->addChild(m);
 			current.mt = m;
-			current.radius = current.dr * current.radius;
-			*/
-			///*
+			if (current.radius / current.length > 0.02)
+				current.radius = current.dr * current.radius;
+			//*/
+			/*  using gl line
 			current.mt->addChild(new Line(current.radius, 1, current.color));
 			MatrixTransform * m = new MatrixTransform(grow);
 			current.mt->addChild(m);
 			current.mt = m;
 			current.radius = current.dr * current.radius;
-			//*/
+			*/
 			break;
 		}
 		case 'L':{
-			//current.mt->addChild(new Leaf(0.02, 0.03, Vector3d(0, 1, 0)));
-			current.mt->addChild(new Sphere(0.05, 20, 20, Vector3d(0, 1, 0), draw::SOLID));
+			double random = (double)rand() / RAND_MAX;
+			if (random < 0.05)
+				current.mt->addChild(new Sphere(0.5, 20, 20, Vector3d(1, 0, 0), draw::SOLID));
+			else
+				current.mt->addChild(new Leaf(0.6, 0.8, leafColor));
+			//current.mt->addChild(new Sphere(1, 20, 20, Vector3d(0, current.radius / 4, 0), draw::SOLID));
 			//current.mt->addChild(new Cube(0.05, Vector3d(0, 1, 0), draw::SOLID));
 			break;
 		}
 			
 		case '[':
 			st.push(current);
-			current.radius = current.radius * current.radius;
+			current.length = current.length * current.dr;
 			break;
 		case ']':
 			current = st.top();
 			st.pop();
+			break;
+		case '!':	// decrease current thickness
+			if (current.radius > 0.2)
+				current.radius = current.dr * current.radius;
+			break;
+		case '?':	// increase current thickness
+			current.radius = current.radius / current.dr;
+			break;
+		case '<':	// increase current length
+			current.length = current.length / current.dr;
+			break;
+		case '>':	// decrease current length
+			current.length = current.length * current.dr;
 			break;
 		}
 	}

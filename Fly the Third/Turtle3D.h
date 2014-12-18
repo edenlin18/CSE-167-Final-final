@@ -15,6 +15,7 @@ enum COLOR{RED, GREEN, BLUE, WHITE, BLACK};
 struct TurtleInfo{
 	Vector3d color;
 	double radius;
+	double length;
 	double dr;
 	MatrixTransform * mt;
 };
@@ -34,7 +35,7 @@ private :
 	Lstring* ls;
 	MyStack st;
 	string axiom;
-	Matrix4d left, right, pitchUp, pitchDown, rollLeft, rollRight, grow;
+	Matrix4d left, right, pitchUp, pitchDown, rollLeft, rollRight, grow1, grow2;
 
 };
 

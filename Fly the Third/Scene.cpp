@@ -7,15 +7,28 @@ Scene::~Scene(){
 }
 
 void Scene::initialize(){
-	turtle = new Turtle3D("ABC-D+E", "ABCDE", 20, 20, 0.8);
-	turtle->addRule('A', "FFFFFFF[-\AE]F[+&+AE]FFF", 1.0);
-	turtle->addRule('B', "^^^FF", 0.3);
-	turtle->addRule('B', "FF&&&FF", 0.3);
-	turtle->addRule('B', "+F\\FF", 0.4);
-	turtle->addRule('C', "F[/+CE]F[^AE]F", 1.0);
-	turtle->addRule('D', "FF&F", 1.0);
-	turtle->addRule('E', "[-/F][^-FL][\FFL][+F][&FL][+FFL]FFL", 1.0);
-	mt = turtle->generate(5);
+	/*
+	turtle = new Turtle3D("ABCDE", "ABCDE", 13.5, 10, 0.9);
+	turtle->addRule('A', "FFFFFFF[-\AE][++&AE]F[+&+AE]FFF", 0.5);
+	turtle->addRule('A', "FFFFFFF[+++//AE]F[+&+AE]FFF", 0.5);
+	//turtle->addRule('B', "^^^FF", 0.33);
+	turtle->addRule('B', "FF[&FF]FF", 0.5);
+	turtle->addRule('B', "F[^FF]FF", 0.5);
+	turtle->addRule('C', "F[/+CE]F[^AE]F", 0.5);
+	turtle->addRule('C', "F[\-CE]F[&AE]F", 0.5);
+	turtle->addRule('D', "FF[&F]F",1.0);
+	turtle->addRule('E', "[-/F+L-L][^-F^L&L][\FF&L^L--L][+F/L&L+L][&F\L&&L][+FFL&L^L--L]FFL",1.0);
+
+
+	mt = turtle->generate(g);
+	Matrix4d t;
+	t.makeTranslate(0, -1, 0);
+	tt = new MatrixTransform(t);
+	root->addChild(rotate_mt);
+	rotate_mt->addChild(scaling_mt);
+	scaling_mt->addChild(tt);
+	tt->addChild(mt);
+	*/
 
 	city = new City(mt);
 	root = new MatrixTransform(Matrix4d());

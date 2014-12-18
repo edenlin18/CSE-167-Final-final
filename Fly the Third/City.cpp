@@ -49,7 +49,7 @@ City::City(MatrixTransform* mt) {
 				layerCount = (rand() * (7 - 3)) / RAND_MAX + 3;
 				choice = 2;
 			}
-			else if (x > 50.0 && x < 56.0) {
+			/*else if (x > 50.0 && x < 56.0) {
 				Matrix4d t;
 				t.makeTranslate(x, -1, z);
 				MatrixTransform* translation = new MatrixTransform(t);
@@ -60,7 +60,7 @@ City::City(MatrixTransform* mt) {
 				//tt->addChild(mt);
 				root->addChild(translation);
 				translation->addChild(mt);
-			}
+			}*/
 
 			bConstructor = new BuildingConstructor(texture, translationSetter, maxH, minH, layerCount, choice);
 			root->addChild(bConstructor->getRoot());
@@ -80,8 +80,8 @@ void City::init() {
 	// Create ID for texture
 	glGenTextures(6, &texture[0]);
 
-	char* filenames[6] = { "./building_texture/building5.jpg", "./building_texture/pixelcity_windows7.jpg", "./building_texture/building3.jpg",
-		"./building_texture/building6.jpg", "./building_texture/roof1.jpg", "./building_texture/roof2.jpg" };
+	char* filenames[6] = { "./building_texture/test5.jpg", "./building_texture/test6.jpg", "./building_texture/test7.jpg",
+		"./building_texture/test8.jpg", "./building_texture/roof1.jpg", "./building_texture/roof2.jpg" };
 
 	for (unsigned int counter = 0; counter < 6; ++counter) {
 

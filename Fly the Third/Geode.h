@@ -8,6 +8,10 @@ class Geode : public Node{
 public:
 	Geode(){};
 	void draw(Matrix4d & m){
+		glMatrixMode(GL_MODELVIEW);
+		glLoadMatrixd(m.getPointer());
+		render();
+		/*
 		Matrix4d temp;
 		glPushMatrix();
 		glGetDoublev(GL_MODELVIEW_MATRIX, temp.getPointer());
@@ -15,6 +19,7 @@ public:
 		render();
 		glMatrixMode(GL_MODELVIEW);
 		glPopMatrix();
+		*/
 	};
 	void draw(Matrix4d & m, FrustumCulling & fc){
 		switch(fc.sphereInFrustum(bs.center, bs.radius)){

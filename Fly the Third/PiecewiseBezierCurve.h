@@ -10,7 +10,8 @@
 class PiecewiseBezierCurve{
 
 public:
-	PiecewiseBezierCurve(int, Vector3d *, int, bool debug = false);
+	PiecewiseBezierCurve(int, Vector3d *, int,bool closed, bool debug = false);
+	PiecewiseBezierCurve(Vector3d * cp, int numOfCp, int resolution, bool closed, bool debug = false);
 	Vector3d compute(double t);
 	bool setCp(int index, Vector3d cp);
 	Vector3d getCp(int index);
@@ -19,10 +20,12 @@ public:
 	void selectPrev();
 	int getSelected();
 	void deSelect();
+	void print();
 private :
 	int N;
 	int resolution;
 	bool debug;
+	bool closed;
 	int selected;
 	Vector3d * cp;	// array of control points
 	Matrix4d * Cs;	// array of matrix for computing x(t)

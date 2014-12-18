@@ -31,7 +31,7 @@ void BuildingConstructor::construct() {
 	GLdouble scaleMax = 0.90;
 	GLdouble scaleMin = 0.5;
 	double colorH = 1.0;
-	double colorL = 0.75;
+	double colorL = 1.0;
 	double r = (double) rand() * (colorH + 1.0 - colorL) / (double) RAND_MAX + colorL;
 	double g = (double) rand() * (colorH + 1.0 - colorL) / (double) RAND_MAX + colorL;
 	double b = (double) rand() * (colorH + 1.0 - colorL) / (double) RAND_MAX + colorL;

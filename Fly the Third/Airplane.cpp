@@ -9,8 +9,8 @@ Airplane::Airplane(Vector3d p, Vector3d d) {
 
 void Airplane::init() {
 	root = new MatrixTransform(Matrix4d());
-	root->addChild(Parser::parse_object("paperAirplane.obj"));
-	s.makeScale(3, 3, 3);
+	root->addChild(Parser::parse_object("BiPlaneObject.obj"));
+	s.makeScale(0.01, 0.01, 0.01);
 	t.makeTranslate(position[0], position[1], position[2]);
 	//Vector3d axis = Vector3d(-1, 0, 0) * direction;
 	Vector3d axis = direction * Vector3d(1, 0, 0);
@@ -22,6 +22,10 @@ void Airplane::init() {
 
 void Airplane::setMatrixTransformMatrix(Matrix4d& C) {
 	root->setMatrix(C);
+}
+
+Vector3d Airplane::getPosition(){
+	return position;
 }
 
 Matrix4d Airplane::getMatrixTransformMatrix() {

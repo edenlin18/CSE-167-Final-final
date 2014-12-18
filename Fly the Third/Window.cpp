@@ -1,5 +1,12 @@
 #include "Window.h"
 
+#define ROTSCALE 50.0;
+#define ZOOMSCALE 2.0;
+#define DELTA 0.1
+#define ANGLE 1.0
+#define TIME_INTERVAL 0.001
+
+
 GLfloat Window::width = 640.0;
 GLfloat Window::height = 480.0;
 
@@ -8,6 +15,9 @@ GLuint Window::fboID;
 Shader* Window::shader;
 
 Scene* Window::scene;
+
+MatrixTransform* skyboxPos;
+SkyBox* skybox;
 
 bool DEBUG = true;
 bool debugSM = false;
@@ -66,7 +76,7 @@ namespace SM{
 
 // Light
 namespace L{
-	float position[3] = { 0, 10, 20 };
+	float position[3] = {50, 100, 50 };
 	float lookAt[3] = { 0, 0, 0 };
 	const float MOVEMENT = 30.0;
 
@@ -91,15 +101,15 @@ namespace L{
 // Camera
 namespace C{
 	//float position[3] = { 5, 40, 80 };
-	float position[3] = { 5, 20, 40 };
+	float position[3] = { 5, 20, 20 };
 	//float lookAt[3] = { 2, 0, -10 };
 	float lookAt[3] = { 0, 0, 0 };
 
 	//Camera.Look(vec3(1.75f, 1.75f, 5.0f), vec3(0.0f, 0.0f, 0.0f));
 
 	const GLdouble FOVY = 60;
-	const GLdouble NEARZ = 1;
-	const GLdouble FARZ = 40000.0;
+	const GLdouble NEARZ = 0.001;
+	const GLdouble FARZ = 1000.0;
 
 	//perspective(45.0f, (float)Width / (float)Height, 0.125f, 512.0f);
 
@@ -109,22 +119,179 @@ namespace C{
 	Matrix4d PM;
 }
 
-void Window::initialize(){
+// MERGE DOWN
 
+struct MovingCamera {
+	Camera* cam;
+	double delta;
+	double t;
+	PiecewiseBezierCurve * pbc;
+	MovingCamera(Vector3d lookat, Vector3d up, double _delta, PiecewiseBezierCurve * _pbc) {
+		delta = _delta;
+		t = 0.0;
+		pbc = _pbc;
+		cam = new Camera(pbc->getCp(0), lookat, up);
+	}
+	void move() {
+		t += delta;
+		if (t > 1.0)
+			t = 0.0;
+		cam->move(pbc->compute(t));
+	}
+	void lookat(Vector3d lookat) {
+		cam->setLookAt(lookat);
+	}
+};
+
+struct PlaneCamera {
+	Camera* cam;
+	double delta;
+	double tc;
+	double tp;
+	PiecewiseBezierCurve * pbc;
+	Airplane * plane;
+	PlaneCamera(Vector3d up, double _delta, double interval, PiecewiseBezierCurve * _pbc) {
+		delta = _delta;
+		tc = 0.0;
+		tp = tc + interval;
+		pbc = _pbc;
+		Vector3d v = pbc->compute(tp);
+		plane = new Airplane(v, pbc->compute(tp + delta));
+		cam = new Camera(pbc->getCp(0), plane->getPosition(), up);
+	}
+	void move() {
+		tc += delta;
+		tp += delta;
+		if (tc > 1)
+			tc = 0.0;
+		if (tp > 1)
+			tp = 0.0;
+		cam->move(pbc->compute(tc));
+		plane->move(pbc->compute(tp));
+		cam->setLookAt(plane->getPosition());
+	}
+};
+
+//trackball variables
+control::MOVEMENT movement = control::NONE;
+Vector3d lastPoint;
+Matrix4d rotation;
+Matrix4d scaling;
+MatrixTransform* Window::scaling_mt = new MatrixTransform(scaling);
+MatrixTransform* Window::rotate_mt = new MatrixTransform(rotation);
+MatrixTransform* root;
+City* c;
+Airplane* plane;
+
+Vector3d oldPos;
+Vector3d newPos;
+double t = 0.06;
+double tc = 0.0;
+MatrixTransform * tt;
+MatrixTransform * mt;
+Turtle3D * turtle;
+PiecewiseBezierCurve * pbc;
+
+PlaneCamera* pc;
+MovingCamera ** mc;
+int choice = 3;
+
+bool selected = false;
+int g = 1;
+
+void Window::init() {
+	///*
+	turtle = new Turtle3D("ABCDE", "ABCDE", 13.5, 10, 0.9);
+	turtle->addRule('A', "FFFFFFF[-\AE][++&AE]F[+&+AE]FFF", 0.5);
+	turtle->addRule('A', "FFFFFFF[+++//AE]F[+&+AE]FFF", 0.5);
+	//turtle->addRule('B', "^^^FF", 0.33);
+	turtle->addRule('B', "FF[&FF]FF", 0.5);
+	turtle->addRule('B', "F[^FF]FF", 0.5);
+	turtle->addRule('C', "F[/+CE]F[^AE]F", 0.5);
+	turtle->addRule('C', "F[\-CE]F[&AE]F", 0.5);
+	turtle->addRule('D', "FF[&F]F",1.0);
+	turtle->addRule('E', "[-/F+L-L][^-F^L&L][\FF&L^L--L][+F/L&L+L][&F\L&&L][+FFL&L^L--L]FFL",1.0);
+
+	root = new MatrixTransform(Matrix4d());
+	mt = turtle->generate(g);
+	Matrix4d t;
+	t.makeTranslate(0, -1, 0);
+	tt = new MatrixTransform(t);
+	root->addChild(rotate_mt);
+	rotate_mt->addChild(scaling_mt);
+	scaling_mt->addChild(tt);
+	//tt->addChild(mt);
+	//*/
+
+	///*
+
+	Vector3d * v = new Vector3d[5];
+	v[0] = Vector3d(0, 9, 0);
+	v[1] = Vector3d(20, 12, 0);
+	v[2] = Vector3d(20, 9, -10);
+	v[3] = Vector3d(0, 12, -10);
+	//v[4] = Vector3d(0, 30, -8);
+	pbc = new PiecewiseBezierCurve(4, v, 10000, true);
+	//cam.move( pbc->getCp(0));
+	//oldPos = pbc->getCp(0);
+
+
+
+	// test
+	srand(time(NULL));
+	c = new City(mt);
+	root->addChild(c->getRoot());
+	//plane = new Airplane(pbc->getCp(0),pbc->getCp(1) - pbc->getCp(0));
+	pc = new PlaneCamera(Vector3d(0, 1, 0), 0.0009, 0.1, pbc);
+
+
+	root->addChild(pc->plane->getRoot());
+
+	Vector3d * v1 = new Vector3d[4];
+	v1[0] = Vector3d(0, 3, 0);
+	v1[1] = Vector3d(20, 5, 0);
+	v1[2] = Vector3d(20, 4, -10);
+	v1[3] = Vector3d(0, 3, -10);
+
+	mc = new MovingCamera*[3];
+	mc[0] = new MovingCamera(Vector3d(0, 1, 0), Vector3d(1, 0, 0), 0.00005, new PiecewiseBezierCurve(4, v1, 1000, true));
+
+	Vector3d * v2 = new Vector3d[4];
+	v2[0] = Vector3d(-3, 7, 4);
+	v2[1] = Vector3d(4, 5, 0);
+	v2[2] = Vector3d(20, 4, -10);
+	v2[3] = Vector3d(0, 3, -10);
+	mc[1] = new MovingCamera(Vector3d(0, 1, 1), Vector3d(1, 1, 0), 0.0005, new PiecewiseBezierCurve(4, v2, 1000, true));
+
+	mc[2] = new MovingCamera(Vector3d(0, 1, 1), Vector3d(1, 1, 0), 0.0003, new PiecewiseBezierCurve(4, v1, 1000, true));
+	//*/
+}
+
+void Window::initialize(){
+	
 	initializeFBO();
 	initializeShader();
 	initializeTexture();
 	initializeMatrix();
 
 	// SCENE
-	scene = new Scene();
-	scene->initialize();
+	// scene = new Scene();
+	// scene->initialize();
+	init();
 
+	// Skybox
+	Matrix4d temp;
+	temp.makeScale(50.0, 1.0, 50.0);
+	skybox = new SkyBox();
+	skybox->init();
+	
 	// LIGHTING
 	glLightfv(GL_LIGHT0, GL_POSITION, L::position);
 	glLightfv(GL_LIGHT0, GL_AMBIENT, L::ambient);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, L::diffuse);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, L::specular);
+
+	
 
 	debug("initialize()");
 }
@@ -266,7 +433,14 @@ void Window::setTextureMatrix(){
 
 ///*
 void Window::draw(){
-	scene->draw(Matrix4d());
+	//scene->draw(Matrix4d());
+	if (choice == 3) {
+		root->draw(pc->cam->getMatrix());
+	}
+	else {
+		root->draw(mc[choice]->cam->getMatrix());
+	}
+	pc->pbc->render(pc->cam->getMatrix());
 }
 //*/
 
@@ -340,10 +514,18 @@ void Window::thirdPassSM(){
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadMatrixd(C::PM.getPointer());
+	
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadMatrixd(C::VM.getPointer());
-
+	/*
+	if (choice == 3) {
+		glLoadMatrixd(pc->cam->getMatrix().getPointer());
+	}
+	else {
+		glLoadMatrixd(mc[choice]->cam->getMatrix().getPointer());
+	}
+	*/
 	glLightfv(GL_LIGHT0, GL_POSITION, L::position);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -368,6 +550,15 @@ void Window::thirdPassSM(){
 	glUniform1fARB(SM::uniformX, 1.0 / SM::WIDTH);
 	glUniform1fARB(SM::uniformY, 1.0 / SM::HEIGHT);
 
+	/*
+	Matrix4d temp;
+	if (choice == 3) {
+		temp = bias * L::PM * L::VM * pc->cam->getMatrix().inverse();
+	}
+	else {
+		temp = bias * L::PM * L::VM * mc[choice]->cam->getMatrix().inverse();
+	}
+	*/
 	Matrix4d temp = bias * L::PM * L::VM * C::IVM;
 
 	float test[16];
@@ -434,39 +625,18 @@ void Window::drawSM(){
 
 // Regular render
 void Window::drawR(){
-	glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);
 
-	// ADDITION
-	glViewport(0, 0, width, height);
-
-	// Clear previous frame values
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	glPushMatrix();
-	glMatrixMode(GL_PROJECTION);
-	glLoadMatrixd(C::PM.getPointer());
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixd(C::VM.getPointer());
-
-	draw();
-
-	glPopMatrix();
-
-	glDisable(GL_LIGHTING);
-	glDisable(GL_LIGHT0);
 }
 
-void Window::displayCallback(){
-	
+void Window::displayCallback() {
+
 	// Ensure MODELVIEW 
 	glMatrixMode(GL_MODELVIEW);
 
 	//glPushMatrix();
-	
+
 	drawSM();
-	
+
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_FRONT);
 	glPushMatrix();
@@ -503,8 +673,28 @@ void Window::displayCallback(){
 
 	glPopMatrix();
 	glDisable(GL_CULL_FACE);
-	
+
 	//glPopMatrix();
+
+
+	// skybox
+	glPushMatrix();
+	glMatrixMode(GL_MODELVIEW);
+	Matrix4d temp;
+	temp.makeScale(1, 1, 1);
+	// temp.makeTranslate(-C::position[X], -C::position[Y], -C::position[Z]);
+	glLoadMatrixd((temp).getPointer());
+	//glLoadIdentity();
+	//skybox->render();
+
+	/*glColor3d(1.0, 0.0, 0.0);
+	glBegin(GL_QUADS);
+	glVertex3d(-1, 1, -1);
+	glVertex3d(-1, -1, -1);
+	glVertex3d(1, -1, -1);
+	glVertex3d(1, 1, -1);
+	glEnd();*/
+	glPopMatrix();
 
 	glutSwapBuffers();
 
@@ -539,6 +729,12 @@ void Window::debug(const string& comment){
 
 void Window::idleCallback(){
 	displayCallback();
+	pc->move();
+	for (int i = 0; i < 3; i++)
+		mc[i]->move();
+	mc[0]->lookat(pc->plane->getPosition());
+	mc[1]->lookat(mc[0]->pbc->compute(mc[0]->t));
+	mc[2]->lookat(mc[1]->pbc->compute(mc[1]->t));
 }
 
 void Window::processKeyboard(unsigned char key, int x, int y){
@@ -546,14 +742,95 @@ void Window::processKeyboard(unsigned char key, int x, int y){
 	case 27: // ESC
 		exit(0);
 		break;
-	case '1':
-		mode = LIGHT;
+	case 'g':
+		g++;
+		tt->removeChild(mt);
+		delete mt;
+		mt = turtle->generate(g);
+		tt->addChild(mt);
 		break;
-	case '2':
-		mode = TEXTURE;
+	case 'f':
+		if (g == 0)
+			return;
+		g--;
+		tt->removeChild(mt);
+		delete mt;
+		mt = turtle->generate(g);
+		tt->addChild(mt);
 		break;
-	case '3':
-		mode = SHADOW;
+	case 'd':
+		selected = false;
+		pbc->deSelect();
+		break;
+	case 'x':
+		if (selected) {
+			int index = pbc->getSelected();
+			Vector3d v = pbc->getCp(index);
+			v.set(0, v[0] + DELTA);
+			pbc->setCp(index, v);
+			cerr << "sdf";
+		}
+		break;
+	case 'X':
+		if (selected) {
+			int index = pbc->getSelected();
+			Vector3d v = pbc->getCp(index);
+			v.set(0, v[0] - DELTA);
+			pbc->setCp(index, v);
+		}
+		break;
+	case 'y':
+		if (selected) {
+			int index = pbc->getSelected();
+			Vector3d v = pbc->getCp(index);
+			v.set(1, v[1] + DELTA);
+			pbc->setCp(index, v);
+		}
+		break;
+	case 'Y':
+		if (selected) {
+			int index = pbc->getSelected();
+			Vector3d v = pbc->getCp(index);
+			v.set(1, v[1] - DELTA);
+			pbc->setCp(index, v);
+		}
+		break;
+	case 'z':
+		if (selected) {
+			int index = pbc->getSelected();
+			Vector3d v = pbc->getCp(index);
+			v.set(2, v[2] + DELTA);
+			pbc->setCp(index, v);
+		}
+		break;
+	case 'Z':
+		if (selected) {
+			int index = pbc->getSelected();
+			Vector3d v = pbc->getCp(index);
+			v.set(2, v[2] - DELTA);
+			pbc->setCp(index, v);
+		}
+		break;
+	case 'c':{
+		/*
+		t += TIME_INTERVAL;
+		if (t > 1)
+		t = 0.0;
+		tc += TIME_INTERVAL;
+
+		// std::cerr << "tc: " << tc << " t: " << t << std::endl;
+		cam.move(pbc->compute(tc));
+		Vector3d l = pbc->compute(t);
+		plane->move(l);
+		cam.setLookAt(l);
+		oldPos = newPos;
+		*/
+		pc->move();
+	}
+		break;
+	case 'a':
+		choice++;
+		choice = choice % 4;
 		break;
 	}
 }

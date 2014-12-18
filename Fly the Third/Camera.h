@@ -29,6 +29,7 @@ public:
 	Vector3d getEye();
 	Vector3d getLookAt();
 	Vector3d getUp();
+	void setLookAt(Vector3d);
 
 };
 

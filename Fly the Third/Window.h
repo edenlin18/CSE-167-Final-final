@@ -10,6 +10,10 @@
 
 #include "SOIL.h"
 #include "Scene.h"
+#include "SkyBox.h"
+#include "PiecewiseBezierCurve.h"
+#include "Camera.h"
+#include "Airplane.h"
 
 using namespace std;
 
@@ -26,8 +30,14 @@ public:
 	// Members
 	static Scene* scene;
 
+	// Camera
+	static MatrixTransform* scaling_mt;
+	static MatrixTransform* rotate_mt;
+	
+
 	// Helpers
 	static void initialize();
+	static void init(); // new 
 	static void initializeFBO();
 	static void initializeShader();
 	static void initializeTexture();

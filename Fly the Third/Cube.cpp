@@ -83,7 +83,7 @@ void Cube::drawBox(GLfloat size) {
 	for (i = 5; i >= 0; i--) {
 
 		glColor3d(color[0], color[1], color[2]);
-		scalingProportion = 0.8;
+		scalingProportion = 0.5;
 
 		if (i != 1 && i != 3) {
 			if (buildingChoice == 1) {

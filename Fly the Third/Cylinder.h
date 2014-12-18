@@ -8,16 +8,16 @@
 
 class Cylinder : public Geode{
 public:
-	Cylinder(double base, double top, double height, int slices, int stacks, Vector3d color, Material *ma = NULL);
+	Cylinder(double base_r, double top_r, double height, int resolution, Vector3d color, Material *ma = NULL);
 	Bs update();
 private:
 	void render();
-	double base, top, height;
-	int slices;
-	int stacks;
+	double base_r, top_r, height;
+	int resolution;
 	Vector3d color;
 	Material *material;
-	GLUquadricObj *obj;
+	Vector4d ** top;
+	Vector4d ** bottom;
 };
 
 #endif
