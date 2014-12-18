@@ -2,12 +2,15 @@ uniform sampler2D Texture;
 uniform sampler2D/*Shadow*/ ShadowMap;
 
 uniform int Shading;
+uniform int shadowing;
+uniform int texturing;
 
 varying vec4 shadowCoordinates, vertex;
 varying vec3 normal, direction;
 
 void main(){    
 
+	/*
 	// PER PIXEL LIGHTING
 	vec3 L = normalize(gl_LightSource[0].position);//direction);
 	vec3 E = normalize(-vertex); // we are in Eye Coordinates, so EyePos is (0,0,0)  
@@ -23,18 +26,19 @@ void main(){
 	specular = clamp(specular, 0.0, 1.0); 
 	// write Total Color:  
 	vec4 color = ambient + diffuse; // + specular;  
+	*/
 
 
 
 
 	// COLORING
-	gl_FragColor = gl_Color; // * color;
+	gl_FragColor = gl_Color;
 
 
 
 
 	// TEXTURING
-    if(Shading >= 1){
+    if(texturing == 1){
 		gl_FragColor *= texture2D(Texture, gl_TexCoord[0].st);
 	}
 
@@ -43,7 +47,7 @@ void main(){
 
 	// SHADOW MAP
 	float visibility = 1.0;
-	if(Shading >= 2){
+	if(shadowing == 1){
 		float bias = 0.0001;
 		if(shadowCoordinates.w > 0.0){
 

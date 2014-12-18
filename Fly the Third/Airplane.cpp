@@ -11,7 +11,8 @@ void Airplane::init() {
 	root = new MatrixTransform(Matrix4d());
 	root->addChild(Parser::parse_object("./resource/BiPlaneObject.object"));
 	//root->addChild(Parser::parse_object("./resource/paperAirplane.object"));
-	s.makeScale(0.01, 0.01, 0.01);
+	double size = 0.01;
+	s.makeScale(size, size, size);
 	t.makeTranslate(position[0], position[1], position[2]);
 	//Vector3d axis = Vector3d(-1, 0, 0) * direction;
 	Vector3d axis = direction * Vector3d(1, 0, 0);

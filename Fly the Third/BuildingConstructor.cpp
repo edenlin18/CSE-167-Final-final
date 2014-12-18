@@ -39,7 +39,7 @@ void BuildingConstructor::construct() {
 	GLuint buildingChoice = rand() * (3 + 1) / RAND_MAX;
 	GLuint roofChoice = rand() * (5 - 4 + 1) / RAND_MAX + 4;
 
-	std::cerr << "buildingChoice: " << buildingChoice << "  roofChoice: " << roofChoice << std::endl;
+	//std::cerr << "buildingChoice: " << buildingChoice << "  roofChoice: " << roofChoice << std::endl;
 
 	rotation.identity();
 	rotation90.makeRotateY(rotationAngle);

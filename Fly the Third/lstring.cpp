@@ -6,6 +6,8 @@ Lstring::Lstring(string c, string v){
 	axiom = c;
 	current = c;
 	V = v;
+	generation = 0;
+	generations.push_back(c);
 }
 
 void Lstring::addRule(Rule *r){
@@ -14,6 +16,10 @@ void Lstring::addRule(Rule *r){
 
 string Lstring::getGeneration(int index){
 	return generations[index];
+}
+
+int Lstring::getGeneration(){
+	return generation;
 }
 
 string Lstring::getCurrent(){
@@ -54,7 +60,7 @@ void Lstring::generate(){
 			continue;
 		}
 		MyRule rs = searchRules(c);
-		Rule* choose = NULL;
+		Rule* choose;
 		if (rs.size() == 1)
 			choose = rs[0];
 		else{
@@ -71,5 +77,6 @@ void Lstring::generate(){
 		current.replace(i, 1, choose->word);
 		i += (choose->word).length();
 	}
+	generation++;
 	generations.push_back(current);
 }

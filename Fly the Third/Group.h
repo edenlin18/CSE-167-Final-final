@@ -14,6 +14,7 @@ public :
 	virtual Bs update() = 0;
 	void addChild(Node *);
 	void removeChild(Node *);
+	void remove();
 
 protected :
 	std::list<Node*> children;
