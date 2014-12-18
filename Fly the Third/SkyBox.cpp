@@ -13,13 +13,23 @@ void SkyBox::init() {
 	glGenTextures(6, &texture[0]);
 
 	int width, height;
+	/*
 	char* filenames[6] = { "./skyBox/Skybox_Water222_right.jpg", "./skyBox/Skybox_Water222_left.jpg",
 		"./skyBox/Skybox_Water222_top.jpg", "./skyBox/Skybox_Water222_base.jpg", "./skyBox/Skybox_Water222_back.jpg",
 		"./skyBox/Skybox_Water222_front.jpg" };
+	*/
 
-	/*char* filenames[6] = { "./skyBox/TropicalSunnyDayRight2048.png", "./skyBox/TropicalSunnyDayLeft2048.png",
+	/*
+	char* filenames[6] = { "./skyBox/TropicalSunnyDayRight2048.png", "./skyBox/TropicalSunnyDayLeft2048.png",
 		"./skyBox/TropicalSunnyDayUp2048.png", "./skyBox/TropicalSunnyDayDown2048.png", "./skyBox/TropicalSunnyDayBack2048.png",
-		"./skyBox/TropicalSunnyDayFront2048.png" };*/
+		"./skyBox/TropicalSunnyDayFront2048.png" };
+	*/
+
+	///*
+	char* filenames[6] = { "./skyBox/TropicalSunnyDayLeft2048.png", "./skyBox/TropicalSunnyDayRight2048.png",
+		"./skyBox/TropicalSunnyDayUp2048.png", "./skyBox/TropicalSunnyDayDown2048.png",
+		"./skyBox/TropicalSunnyDayBack2048.png", "./skyBox/TropicalSunnyDayFront2048.png" };
+	//*/
 
 	for (unsigned int counter = 0; counter < 6; ++counter) {
 		texture[counter] = SOIL_load_OGL_texture

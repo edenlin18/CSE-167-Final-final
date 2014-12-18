@@ -440,8 +440,11 @@ void Window::setTextureMatrix(){
 
 ///*
 void Window::draw(Matrix4d m){
+
+	root->draw(m);
+
 	//scene->draw(Matrix4d());
-	///*
+	/*
 	if (choice == 3) {
 		root->draw(m);
 	}
@@ -449,7 +452,7 @@ void Window::draw(Matrix4d m){
 		root->draw(m);
 	}
 	//pc->pbc->render(m);
-	//*/
+	*/
 	//pc->plane->getRoot()->draw(pc->cam->getMatrix());
 }
 //*/
