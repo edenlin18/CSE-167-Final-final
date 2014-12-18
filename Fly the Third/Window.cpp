@@ -31,8 +31,10 @@ const int X = 0;
 const int Y = 1;
 const int Z = 2;
 
+bool bezier_toggle = false;
+
 enum TEXTURE{
-	CUBE, FLOOR, TEXTURE_COUNT
+	CUBE, FLOOR, GRASS, TEXTURE_COUNT
 };
 
 GLuint texture[TEXTURE_COUNT];
@@ -45,10 +47,6 @@ enum {
 	TEXTURE = 1, 
 	SHADOW = 2
 };
-
-
-
-
 
 enum {
 	OFF = 0, ON = 1
@@ -202,7 +200,7 @@ PiecewiseBezierCurve * pbc;
 
 PlaneCamera* pc;
 MovingCamera ** mc;
-int choice = 4;
+int choice = 3;
 
 bool selected = false;
 int g = 1;
@@ -402,11 +400,21 @@ void Window::initializeTexture(){
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
 
-	if (texture[CUBE] == 0){
-		cerr << "CUBE NOT FOUND" << endl;
-	}
-	if (texture[FLOOR] == 0){
-		cerr << "FLOOR NOT FOUND" << endl;
+	texture[GRASS] = SOIL_load_OGL_texture(
+		"resource/grass4.jpg",
+		SOIL_LOAD_AUTO,
+		SOIL_CREATE_NEW_ID,
+		SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT
+		);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+
+	for (int i = 0; i < TEXTURE_COUNT; ++i) {
+		if (texture[i] == 0) {
+			cerr << "Texture " << i << " not found!" << endl;
+		}
 	}
 
 	debug("initializeTexture()");
@@ -632,24 +640,10 @@ void Window::thirdPassSM(){
 		draw(mc[choice]->cam->getMatrix());
 	}
 
-	// DISABLE TEXTURE
-	//glUniform1i(SM::shadowing, OFF);
-	//glUniform1i(T::texturing, T::mode);
-
-	/*
-	glLoadMatrixf(&ViewMatrix);
-	glTranslatef(0.0f, -0.375f, 0.5f);
-	glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
-	glutSolidTorus(0.125f, 0.25f, 64, 64);
-	*/
+	// DRAW GRASS
+	drawG();
 
 	glDisable(GL_CULL_FACE);
-
-	/*
-	glLoadMatrixf(&ViewMatrix);
-	glTranslatef(0.0f, -0.31f, -0.5f);
-	glutSolidTeapot(0.25f);
-	*/
 
 	// Reset
 	glActiveTexture(GL_TEXTURE1); 
@@ -698,6 +692,60 @@ void Window::drawP(Matrix4d m) {
 
 	skybox->draw(m);
 
+	if (bezier_toggle) {
+		pc->pbc->render(m);
+	}
+}
+
+void Window::drawG() {
+	glPushMatrix();
+	glMatrixMode(GL_MODELVIEW);
+	if (choice == 4) {
+		glLoadMatrixd(pc->cam->getMatrix().getPointer());
+	}
+	else {
+		glLoadMatrixd(mc[choice]->cam->getMatrix().getPointer());
+	}
+
+	glBindTexture(GL_TEXTURE_2D, texture[GRASS]);
+
+	glBegin(GL_QUADS);
+
+	static GLfloat offsetY = 0.05;
+
+	glColor3f(0.5, 1.0, 0.5);
+	glNormal3f(0, 1, 0);
+	glTexCoord2f(1.0f, 1.0f); glVertex3f(-10 - 1.5, offsetY, -10 - 1.5);  
+	glTexCoord2f(0.0f, 1.0f); glVertex3f(5 + 2.0, offsetY, -10 - 1.5);  
+	glTexCoord2f(0.0f, 0.0f); glVertex3f(5 + 2.0, offsetY, 5 + 2.5);  
+	glTexCoord2f(1.0f, 0.0f); glVertex3f(-10 - 1.5, offsetY, 5 + 2.5);
+
+	glEnd();
+
+	/*
+	glBegin(GL_LINES);
+	glColor3f(0, 0, 0);
+	glVertex3f(0, 0.0, 0);
+	glVertex3f(0, 10000.0, 0);
+
+	static GLfloat offset = 5;
+
+	glColor3f(1.0, 0.5, 0.5);
+	glVertex3f(offset, 0.0, 0);
+	glVertex3f(offset, 10000.0, 0);
+
+	glColor3f(0.5, 0.5, 1.0);
+	glVertex3f(0, 0.0, offset);
+	glVertex3f(0, 10000.0, offset);
+
+	glColor3f(0.5, 1.0, 1.0);
+	glVertex3f(0, 0.0, offset + 0.5);
+	glVertex3f(0, 10000.0, offset + 0.5);
+
+	glEnd();
+	*/
+
+	glPopMatrix();
 }
 
 void Window::displayCallback() {
@@ -844,9 +892,13 @@ void Window::processKeyboard(unsigned char key, int x, int y){
 		mt = turtle->generate(g);
 		c->treeGrow(mt);
 
-		cerr << "SIZE " << g << endl;
+		//cerr << "SIZE " << g << endl;
+		break;
+	case 'b':
+		bezier_toggle = !bezier_toggle;
 		break;
 	case 'f':
+		/*
 		if (g == 0)
 			return;
 		g--;
@@ -855,6 +907,7 @@ void Window::processKeyboard(unsigned char key, int x, int y){
 		mt = turtle->generate(g);
 		tt->addChild(mt);
 		break;
+		*/
 	case 'd':
 		selected = false;
 		pbc->deSelect();

@@ -61,6 +61,7 @@ public:
 	static void drawR();
 	
 	static void drawP(Matrix4d);
+	static void drawG();
 
 	// Debug
 	static void debug(const string&);

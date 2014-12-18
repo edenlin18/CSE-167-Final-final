@@ -95,12 +95,14 @@ City::City(MatrixTransform* mt) {
 	root->addChild(groundTransform);
 	groundTransform->addChild(new Quad());
 
+	/*
 	ScalingSetter.makeScale(7.5, 0.0, 7.5);
 	Matrix4d grassTranslate;
-	grassTranslate.makeTranslate(0.0, 0.05, -1.5);
+	grassTranslate.makeTranslate(0.0, 0.05, 0.0);// -1.5);
 	MatrixTransform* grassTransform = new MatrixTransform(grassTranslate * ScalingSetter);
 	root->addChild(grassTransform);
 	grassTransform->addChild(new Quad(Vector3d(0.0, 1.0, 0.0)));
+	*/
 }
 
 void City::init() {
