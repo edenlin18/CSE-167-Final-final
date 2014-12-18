@@ -9,7 +9,7 @@ varying vec3 normal, direction;
 void main(){    
 
 	// PER PIXEL LIGHTING
-	vec3 L = normalize(direction);
+	vec3 L = normalize(gl_LightSource[0].position);//direction);
 	vec3 E = normalize(-vertex); // we are in Eye Coordinates, so EyePos is (0,0,0)  
 	vec3 R = normalize(-reflect(L,normal));  
  
@@ -22,13 +22,13 @@ void main(){
 				* pow(max(dot(R,E),0.0), 0.3 * gl_FrontMaterial.shininess);
 	specular = clamp(specular, 0.0, 1.0); 
 	// write Total Color:  
-	vec4 color = ambient + diffuse + specular;  
+	vec4 color = ambient + diffuse; // + specular;  
 
 
 
 
 	// COLORING
-	gl_FragColor = gl_Color;// * color;
+	gl_FragColor = gl_Color; // * color;
 
 
 

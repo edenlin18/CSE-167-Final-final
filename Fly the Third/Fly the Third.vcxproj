@@ -136,6 +136,9 @@
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="resource\BiPlaneObject.object" />
+    <None Include="resource\paperAirplane.object" />
+    <None Include="resource\planeObject.object" />
     <None Include="shader\Experimental.frag" />
     <None Include="shader\PPL.frag" />
     <None Include="shader\PPL.vert" />

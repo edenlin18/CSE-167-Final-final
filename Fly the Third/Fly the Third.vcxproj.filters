@@ -250,6 +250,15 @@
     <None Include="shader\T2.vert">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="resource\BiPlaneObject.object">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resource\paperAirplane.object">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resource\planeObject.object">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="resource\cube.jpg">

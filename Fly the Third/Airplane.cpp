@@ -10,6 +10,7 @@ Airplane::Airplane(Vector3d p, Vector3d d) {
 void Airplane::init() {
 	root = new MatrixTransform(Matrix4d());
 	root->addChild(Parser::parse_object("./resource/BiPlaneObject.object"));
+	//root->addChild(Parser::parse_object("./resource/paperAirplane.object"));
 	s.makeScale(0.01, 0.01, 0.01);
 	t.makeTranslate(position[0], position[1], position[2]);
 	//Vector3d axis = Vector3d(-1, 0, 0) * direction;
