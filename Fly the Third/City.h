@@ -14,10 +14,12 @@ class City {
 	City(MatrixTransform*);
 	void init();
 	MatrixTransform* getRoot();
+	void treeGrow(MatrixTransform* mt);
 	~City();
 	
 	protected:
 	MatrixTransform* root;
+	MatrixTransform* treeRoot[4];
 	GLuint texture[6];
 };
 

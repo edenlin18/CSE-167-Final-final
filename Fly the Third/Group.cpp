@@ -16,6 +16,10 @@ void Group::removeChild(Node * n){
 	children.remove(n);	
 }
 
+void Group::remove() {
+	children.clear();
+}
+
 void Group::draw(Matrix4d & m){
 	for (list<Node*>::const_iterator it = children.begin(); it != children.end(); ++it)
 		(*it)->draw(m); 

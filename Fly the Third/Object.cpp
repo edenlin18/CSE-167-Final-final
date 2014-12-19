@@ -4,6 +4,9 @@ Object::Object() {
 
 void Object::render() {
 	bool colorCheck = color.empty();
+
+	//cerr << color.size() << " VS " << face.size() << " AND " << vertex.size() << endl;
+	
 	glBegin(GL_TRIANGLES);
 	for (unsigned int fIndex = 0; fIndex < face.size(); fIndex++) {
 		for (unsigned int counter = 0; counter < 3; counter++) {
@@ -15,10 +18,13 @@ void Object::render() {
 			GLdouble b = ((double) rand() * 1.0 / (double) RAND_MAX);
 
 
-				if (colorCheck)
-					glColor3f(r, g, b);
-				else
-					glColor3f(color[vIndex]->get(0), color[vIndex]->get(1), color[vIndex]->get(2));
+			if (colorCheck) {
+				glColor3f(r, g, b);
+			}
+			else {
+				glColor3f(color[vIndex]->get(0), color[vIndex]->get(1), color[vIndex]->get(2));
+			}
+					
 
 				glNormal3d(normal[nIndex]->get(0), normal[nIndex]->get(1), normal[nIndex]->get(2));
 				glVertex3d(vertex[vIndex]->get(0), vertex[vIndex]->get(1), vertex[vIndex]->get(2));

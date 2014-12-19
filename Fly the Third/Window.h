@@ -43,6 +43,7 @@ public:
 	static void initializeTexture();
 	static void initializeMatrix();
 	static void update();
+	static double fRand(double fMin, double fMax);
 
 	static void setupMatrices(float position_x, float position_y, float position_z, float lookAt_x, float lookAt_y, float lookAt_z);
 	static void setTextureMatrix();
@@ -60,6 +61,7 @@ public:
 	static void drawR();
 	
 	static void drawP(Matrix4d);
+	static void drawG();
 
 	// Debug
 	static void debug(const string&);

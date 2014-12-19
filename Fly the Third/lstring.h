@@ -38,12 +38,14 @@ public:
 	void generate();
 	string getGeneration(int index);
 	string getCurrent();
+	int getGeneration();
 private:
 	MyRule rules;
 	string axiom;
 	string current;
 	string V;
 	vector<string>generations;
+	int generation;
 
 
 	bool isVariable(char);

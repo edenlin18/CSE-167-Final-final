@@ -33,7 +33,7 @@ MatrixTransform * Turtle3D::generate(int iterations){
 	if (generation >= iterations)
 		s = ls->getGeneration(iterations);
 	else{
-		for (int i = 0; i < iterations; i++)
+		for (int i = 0; i < (iterations - ls->getGeneration()); i++)
 			ls->generate();
 		generation = iterations;
 		s = ls->getCurrent();

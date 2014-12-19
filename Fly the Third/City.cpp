@@ -27,15 +27,38 @@ City::City(MatrixTransform* mt) {
 	turtle->addRule('D', "FF&F", 1.0);
 	MatrixTransform* mt = turtle->generate(5);*/
 
+	int counter = 0;
 
 	for (double z = -50.0; z < 50.0; z += 5.0) {
 		for (double x = -50.0; x < 50.0; x += 5.0) {
 			translationSetter.makeTranslate(x, 0.0, z);
-			if (-17.0 < x && x < 17.0) {
-				maxH = ((double) rand() * (MEDIUM_BUILDING_MAX_HEIGHT - MEDIUM_BUILDING_MIN_HEIGHT)) / (double) RAND_MAX + MEDIUM_BUILDING_MIN_HEIGHT;
-				minH = ((double) rand() * (maxH - MEDIUM_BUILDING_MIN_HEIGHT)) / (double) RAND_MAX + MEDIUM_BUILDING_MIN_HEIGHT;
-				layerCount = (rand() * (3 - 1)) / RAND_MAX + 1;
-				choice = 0;
+			if (-5 <= z && z <= 0 && -5 <= x && x <= 0) {
+				Matrix4d t, s, r;
+				t.makeTranslate(x / 2.0, 0, z / 1.5);
+
+				static GLdouble size = 0.015;
+
+				s.makeScale(size, size, size);
+				r.makeRotateY((double) rand() * (360.0 + 1.0) / (double) RAND_MAX);
+				treeRoot[counter] = new MatrixTransform(t * s * r);
+				//tt = new MatrixTransform(t);
+				//root->addChild(rotate_mt);
+				//rotate_mt->addChild(scaling_mt);
+				//scaling_mt->addChild(tt);
+				//tt->addChild(mt);
+				root->addChild(treeRoot[counter]);
+				treeRoot[counter]->addChild(mt);
+				++counter;
+				continue;
+			}
+			else if (-10 <= z && z <= 5 && -10 <= x && x <= 5) {
+				continue;
+			}
+			else if (-17.0 < x && x < 17.0) {
+					maxH = ((double) rand() * (MEDIUM_BUILDING_MAX_HEIGHT - MEDIUM_BUILDING_MIN_HEIGHT)) / (double) RAND_MAX + MEDIUM_BUILDING_MIN_HEIGHT;
+					minH = ((double) rand() * (maxH - MEDIUM_BUILDING_MIN_HEIGHT)) / (double) RAND_MAX + MEDIUM_BUILDING_MIN_HEIGHT;
+					layerCount = (rand() * (3 - 1)) / RAND_MAX + 1;
+					choice = 0;
 			}
 			else if (x <= -17.0) {
 				maxH = ((double) rand() * (TALL_BUILDING_MAX_HEIGHT - TALL_BUILDING_MIN_HEIGHT)) / (double) RAND_MAX + TALL_BUILDING_MIN_HEIGHT;
@@ -71,7 +94,15 @@ City::City(MatrixTransform* mt) {
 	MatrixTransform* groundTransform = new MatrixTransform(ScalingSetter);
 	root->addChild(groundTransform);
 	groundTransform->addChild(new Quad());
-	init();
+
+	/*
+	ScalingSetter.makeScale(7.5, 0.0, 7.5);
+	Matrix4d grassTranslate;
+	grassTranslate.makeTranslate(0.0, 0.05, 0.0);// -1.5);
+	MatrixTransform* grassTransform = new MatrixTransform(grassTranslate * ScalingSetter);
+	root->addChild(grassTransform);
+	grassTransform->addChild(new Quad(Vector3d(0.0, 1.0, 0.0)));
+	*/
 }
 
 void City::init() {
@@ -80,7 +111,7 @@ void City::init() {
 	// Create ID for texture
 	glGenTextures(6, &texture[0]);
 
-	char* filenames[6] = { "./building_texture/test5.jpg", "./building_texture/test6.jpg", "./building_texture/test7.jpg",
+	char* filenames[6] = { "./building_texture/test5.jpg", "./building_texture/test9.jpg", "./building_texture/test4.jpg",
 		"./building_texture/test8.jpg", "./building_texture/roof1.jpg", "./building_texture/roof2.jpg" };
 
 	for (unsigned int counter = 0; counter < 6; ++counter) {
@@ -108,12 +139,18 @@ void City::init() {
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
 	}
 }
 
 MatrixTransform* City::getRoot() {
 	return this->root;
+}
+
+void City::treeGrow(MatrixTransform* mt) {
+		for (int i = 0; i < 4; ++i) {
+			treeRoot[i]->remove();
+			treeRoot[i]->addChild(mt);
+		}
 }
 
 City::~City() {

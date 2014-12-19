@@ -36,7 +36,6 @@ private :
 	MyStack st;
 	string axiom;
 	Matrix4d left, right, pitchUp, pitchDown, rollLeft, rollRight, grow1, grow2;
-
 };
 
 #endif

@@ -31,8 +31,10 @@ const int X = 0;
 const int Y = 1;
 const int Z = 2;
 
+bool bezier_toggle = false;
+
 enum TEXTURE{
-	CUBE, FLOOR, TEXTURE_COUNT
+	CUBE, FLOOR, GRASS, TEXTURE_COUNT
 };
 
 GLuint texture[TEXTURE_COUNT];
@@ -46,27 +48,31 @@ enum {
 	SHADOW = 2
 };
 
-GLuint shading;
-int mode = LIGHT;
+enum {
+	OFF = 0, ON = 1
+};
 
 // Texture
 namespace T{
-	GLuint uniform;
-	GLuint enable;
-	GLuint disable;
+	GLuint texturing;
+	int mode = OFF;
 }
 
 // Shadow Map
 namespace SM{
 	const int RATIO = 2;
 
-	const GLfloat WIDTH = 2048.0;
-	const GLfloat HEIGHT = 2048.0;
+	const GLfloat WIDTH = 3000;
+	const GLfloat HEIGHT = 3000;
+	//const GLfloat HEIGHT = 2048.0;
 
 	GLhandleARB shaderID;
 	GLuint uniform;
 	GLuint uniformX;
 	GLuint uniformY;
+
+	GLuint shadowing;
+	int mode = OFF;
 
 	// Depth texture
 	GLuint texture;
@@ -76,17 +82,17 @@ namespace SM{
 
 // Light
 namespace L{
-	float position[3] = { 25, 50, 25 };
+	float position[3] = { -25, 50, 25 };
 	float lookAt[3] = { 0, 0, 0 };
 	const float MOVEMENT = 30.0;
 
 	//gluPerspective(35.0f, 1.0f, 4.0f, 16.0f);
 	//static vec3 LightPosition = vec3(0.0f, 2.5f, 5.0f);
 
-	const GLdouble FOVY = 90;
+	const GLdouble FOVY = 75;
 	const GLdouble AR = 1.0;
 	const GLdouble NEARZ = 1.0;
-	const GLdouble FARZ = 40000.0;
+	const GLdouble FARZ = 1000.0;
 	
 	const float ambient[] = { 0.25, 0.25, 0.25, 1.0 };
 	const float diffuse[] = { 0.75, 0.75, 0.75, 1.0 };
@@ -199,6 +205,8 @@ int choice = 3;
 bool selected = false;
 int g = 1;
 
+MatrixTransform* tree;
+
 void Window::init() {
 	///*
 	turtle = new Turtle3D("ABCDE", "ABCDE", 13.5, 10, 0.9);
@@ -225,11 +233,15 @@ void Window::init() {
 
 	///*
 
+	
+
+
+
 	Vector3d * v = new Vector3d[5];
-	v[0] = Vector3d(0, 9, 0);
-	v[1] = Vector3d(20, 12, 0);
-	v[2] = Vector3d(20, 9, -10);
-	v[3] = Vector3d(0, 12, -10);
+	v[0] = Vector3d(0, fRand(10, 20), 0);
+	v[1] = Vector3d(20, fRand(10, 20), 0);
+	v[2] = Vector3d(20, fRand(10, 20), -10);
+	v[3] = Vector3d(0, fRand(10, 20), -10);
 	//v[4] = Vector3d(0, 30, -8);
 	pbc = new PiecewiseBezierCurve(4, v, 10000, true);
 	//cam.move( pbc->getCp(0));
@@ -240,6 +252,7 @@ void Window::init() {
 	// test
 	srand(time(NULL));
 	c = new City(mt);
+	c->init();
 	root->addChild(c->getRoot());
 	//plane = new Airplane(pbc->getCp(0),pbc->getCp(1) - pbc->getCp(0));
 	pc = new PlaneCamera(Vector3d(0, 1, 0), 0.0009, 0.1, pbc);
@@ -249,23 +262,30 @@ void Window::init() {
 	//root->addChild(skybox);
 
 	Vector3d * v1 = new Vector3d[4];
-	v1[0] = Vector3d(0, 3, 0);
-	v1[1] = Vector3d(20, 5, 0);
-	v1[2] = Vector3d(20, 4, -10);
-	v1[3] = Vector3d(0, 3, -10);
+	v1[0] = Vector3d(0, fRand(2, 6), 0);
+	v1[1] = Vector3d(20, fRand(2, 6), 0);
+	v1[2] = Vector3d(20, fRand(2, 6), -10);
+	v1[3] = Vector3d(0, fRand(2, 6), -10);
 
-	mc = new MovingCamera*[3];
+	mc = new MovingCamera*[4];
 	mc[0] = new MovingCamera(Vector3d(0, 1, 0), Vector3d(1, 0, 0), 0.00005, new PiecewiseBezierCurve(4, v1, 1000, true));
 
 	Vector3d * v2 = new Vector3d[4];
-	v2[0] = Vector3d(-3, 7, 4);
-	v2[1] = Vector3d(4, 5, 0);
-	v2[2] = Vector3d(20, 4, -10);
-	v2[3] = Vector3d(0, 3, -10);
+	v2[0] = Vector3d(-5, fRand(3, 8), 10);
+	v2[1] = Vector3d(2.5, fRand(3, 8), 0);
+	v2[2] = Vector3d(20, fRand(3, 8), -10);
+	v2[3] = Vector3d(0, fRand(3, 8), -10);
 	mc[1] = new MovingCamera(Vector3d(0, 1, 1), Vector3d(1, 1, 0), 0.0005, new PiecewiseBezierCurve(4, v2, 1000, true));
 
 	mc[2] = new MovingCamera(Vector3d(0, 1, 1), Vector3d(1, 1, 0), 0.0003, new PiecewiseBezierCurve(4, v1, 1000, true));
-	//*/
+
+	Vector3d * v3 = new Vector3d[4];
+	v3[0] = Vector3d(5, fRand(2, 6), 5);
+	v3[1] = Vector3d(-5, fRand(2, 6), 5);
+	v3[2] = Vector3d(-5, fRand(2, 6), -5);
+	v3[3] = Vector3d(5, fRand(2, 6), -5);
+
+	mc[3] = new MovingCamera(Vector3d(0, 0, 0), Vector3d(0, 1, 0), 0.0003, new PiecewiseBezierCurve(4, v3, 1000, true));
 }
 
 void Window::initialize(){
@@ -336,7 +356,11 @@ void Window::initializeShader(){
 
 	SM::shaderID = shader->getPid();
 
-	shading = glGetUniformLocationARB(SM::shaderID, "Shading");
+	//shading = glGetUniformLocationARB(SM::shaderID, "Shading");
+
+	SM::shadowing = glGetUniformLocationARB(SM::shaderID, "shadowing");
+	T::texturing = glGetUniformLocationARB(SM::shaderID, "texturing");
+
 	SM::matrix = glGetUniformLocationARB(SM::shaderID, "ShadowMatrix");
 	SM::uniformX = glGetUniformLocationARB(SM::shaderID, "OffsetX");
 	SM::uniformY = glGetUniformLocationARB(SM::shaderID, "OffsetY");
@@ -376,11 +400,21 @@ void Window::initializeTexture(){
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
 
-	if (texture[CUBE] == 0){
-		cerr << "CUBE NOT FOUND" << endl;
-	}
-	if (texture[FLOOR] == 0){
-		cerr << "FLOOR NOT FOUND" << endl;
+	texture[GRASS] = SOIL_load_OGL_texture(
+		"resource/grass4.jpg",
+		SOIL_LOAD_AUTO,
+		SOIL_CREATE_NEW_ID,
+		SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT
+		);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+
+	for (int i = 0; i < TEXTURE_COUNT; ++i) {
+		if (texture[i] == 0) {
+			cerr << "Texture " << i << " not found!" << endl;
+		}
 	}
 
 	debug("initializeTexture()");
@@ -440,8 +474,7 @@ void Window::setTextureMatrix(){
 
 ///*
 void Window::draw(Matrix4d m){
-
-	root->draw(m);
+	root->draw(m);	
 
 	//scene->draw(Matrix4d());
 	/*
@@ -454,6 +487,8 @@ void Window::draw(Matrix4d m){
 	//pc->pbc->render(m);
 	*/
 	//pc->plane->getRoot()->draw(pc->cam->getMatrix());
+
+	debug("draw()");
 }
 //*/
 
@@ -532,7 +567,7 @@ void Window::thirdPassSM(){
 	glMatrixMode(GL_MODELVIEW);
 	//glLoadMatrixd(C::VM.getPointer());
 	///*
-	if (choice == 3) {
+	if (choice == 4) {
 		glLoadMatrixd(pc->cam->getMatrix().getPointer());
 	}
 	else {
@@ -565,7 +600,7 @@ void Window::thirdPassSM(){
 
 	///*
 	Matrix4d temp;
-	if (choice == 3) {
+	if (choice == 4) {
 		temp = bias * L::PM * L::VM * pc->cam->getMatrix().inverse();
 	}
 	else {
@@ -590,36 +625,25 @@ void Window::thirdPassSM(){
 	glActiveTexture(GL_TEXTURE1); 
 	glBindTexture(GL_TEXTURE_2D, SM::texture);
 
-	glUniform1i(shading, mode);
+	// ENABLE SHADOWS AND TEXTURES
+	glUniform1i(SM::shadowing, SM::mode);
+	glUniform1i(T::texturing, T::mode);
 
 	// Enable texture
 	glActiveTexture(GL_TEXTURE0);
 
 	// SECOND RENDER
-	if (choice == 3) {
+	if (choice == 4) {
 		draw(pc->cam->getMatrix());
 	}
 	else {
 		draw(mc[choice]->cam->getMatrix());
 	}
 
-	// DISABLE TEXTURE
-	glUniform1i(shading, LIGHT);
-
-	/*
-	glLoadMatrixf(&ViewMatrix);
-	glTranslatef(0.0f, -0.375f, 0.5f);
-	glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
-	glutSolidTorus(0.125f, 0.25f, 64, 64);
-	*/
+	// DRAW GRASS
+	drawG();
 
 	glDisable(GL_CULL_FACE);
-
-	/*
-	glLoadMatrixf(&ViewMatrix);
-	glTranslatef(0.0f, -0.31f, -0.5f);
-	glutSolidTeapot(0.25f);
-	*/
 
 	// Reset
 	glActiveTexture(GL_TEXTURE1); 
@@ -629,7 +653,7 @@ void Window::thirdPassSM(){
 
 	shader->unbind();
 
-	if (choice == 3) {
+	if (choice == 4) {
 		drawP(pc->cam->getMatrix());
 	}
 	else {
@@ -668,6 +692,60 @@ void Window::drawP(Matrix4d m) {
 
 	skybox->draw(m);
 
+	if (bezier_toggle) {
+		pc->pbc->render(m);
+	}
+}
+
+void Window::drawG() {
+	glPushMatrix();
+	glMatrixMode(GL_MODELVIEW);
+	if (choice == 4) {
+		glLoadMatrixd(pc->cam->getMatrix().getPointer());
+	}
+	else {
+		glLoadMatrixd(mc[choice]->cam->getMatrix().getPointer());
+	}
+
+	glBindTexture(GL_TEXTURE_2D, texture[GRASS]);
+
+	glBegin(GL_QUADS);
+
+	static GLfloat offsetY = 0.05;
+
+	glColor3f(0.5, 1.0, 0.5);
+	glNormal3f(0, 1, 0);
+	glTexCoord2f(1.0f, 1.0f); glVertex3f(-10 - 1.5, offsetY, -10 - 1.5);  
+	glTexCoord2f(0.0f, 1.0f); glVertex3f(5 + 2.0, offsetY, -10 - 1.5);  
+	glTexCoord2f(0.0f, 0.0f); glVertex3f(5 + 2.0, offsetY, 5 + 2.5);  
+	glTexCoord2f(1.0f, 0.0f); glVertex3f(-10 - 1.5, offsetY, 5 + 2.5);
+
+	glEnd();
+
+	/*
+	glBegin(GL_LINES);
+	glColor3f(0, 0, 0);
+	glVertex3f(0, 0.0, 0);
+	glVertex3f(0, 10000.0, 0);
+
+	static GLfloat offset = 5;
+
+	glColor3f(1.0, 0.5, 0.5);
+	glVertex3f(offset, 0.0, 0);
+	glVertex3f(offset, 10000.0, 0);
+
+	glColor3f(0.5, 0.5, 1.0);
+	glVertex3f(0, 0.0, offset);
+	glVertex3f(0, 10000.0, offset);
+
+	glColor3f(0.5, 1.0, 1.0);
+	glVertex3f(0, 0.0, offset + 0.5);
+	glVertex3f(0, 10000.0, offset + 0.5);
+
+	glEnd();
+	*/
+
+	glPopMatrix();
 }
 
 void Window::displayCallback() {
@@ -679,6 +757,7 @@ void Window::displayCallback() {
 
 	drawSM();
 
+	/*
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_FRONT);
 	glPushMatrix();
@@ -717,6 +796,7 @@ void Window::displayCallback() {
 
 	glPopMatrix();
 	glDisable(GL_CULL_FACE);
+	*/
 
 	//glPopMatrix();
 
@@ -760,6 +840,11 @@ void Window::reshapeCallback(int w, int h){
 	glPopMatrix();
 }
 
+double Window::fRand(double fMin, double fMax) {
+	double f = (double) rand() / RAND_MAX;
+	return fMin + f * (fMax - fMin);
+}
+
 void Window::debug(const string& comment){
 
 	if (DEBUG){
@@ -774,11 +859,12 @@ void Window::debug(const string& comment){
 void Window::idleCallback(){
 	displayCallback();
 	pc->move();
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < 4; i++)
 		mc[i]->move();
 	mc[0]->lookat(pc->plane->getPosition());
 	mc[1]->lookat(mc[0]->pbc->compute(mc[0]->t));
 	mc[2]->lookat(mc[1]->pbc->compute(mc[1]->t));
+	mc[3]->lookat(Vector3d(0, 0, 0));
 }
 
 void Window::processKeyboard(unsigned char key, int x, int y){
@@ -786,14 +872,33 @@ void Window::processKeyboard(unsigned char key, int x, int y){
 	case 27: // ESC
 		exit(0);
 		break;
+	case 'r':
+		root->removeChild(c->getRoot());
+		c = new City(mt);
+		c->init();
+		root->addChild(c->getRoot());
+		break;
+	case 't':
+		if (g > 1) {
+			g = 1;
+			mt = turtle->generate(g);
+		}
+		break;
 	case 'g':
+		if (g >= 5) {
+			break;
+		}
 		g++;
-		tt->removeChild(mt);
-		delete mt;
 		mt = turtle->generate(g);
-		tt->addChild(mt);
+		c->treeGrow(mt);
+
+		//cerr << "SIZE " << g << endl;
+		break;
+	case 'b':
+		bezier_toggle = !bezier_toggle;
 		break;
 	case 'f':
+		/*
 		if (g == 0)
 			return;
 		g--;
@@ -802,6 +907,7 @@ void Window::processKeyboard(unsigned char key, int x, int y){
 		mt = turtle->generate(g);
 		tt->addChild(mt);
 		break;
+		*/
 	case 'd':
 		selected = false;
 		pbc->deSelect();
@@ -874,8 +980,19 @@ void Window::processKeyboard(unsigned char key, int x, int y){
 		break;
 	case 'a':
 		choice++;
-		choice = choice % 4;
+		choice = choice % 5;
 		break;
+	case '1':
+		choice = 1;
+		break;
+	case '2':
+		choice = 2;
+		break;
+	case '3':
+		choice = 3;
+		break;
+	case '4': // Plane Camera
+		choice = 4;
 	}
 }
 
@@ -885,13 +1002,24 @@ void Window::processSpecial(int key, int x, int y){
 	
 	switch (key){
 	case GLUT_KEY_F1: // Shadow Map debug mode toggle
-		mode = LIGHT;
+		SM::mode = OFF;
+		T::mode = OFF;
 		break;
 	case GLUT_KEY_F2: // Toggle shadow
-		mode = TEXTURE;
+		if (T::mode) {
+			T::mode = OFF;
+		}
+		else {
+			T::mode = ON;
+		}
 		break;
 	case GLUT_KEY_F3:
-		mode = SHADOW;
+		if (SM::mode) {
+			SM::mode = OFF;
+		}
+		else {
+			SM::mode = ON;
+		}
 		break;
 	case GLUT_KEY_F4:
 		update_on = !update_on;
